@@ -29,11 +29,11 @@
           <!-- Only for registered user and creator of the housing offer-->
           {{#if isOwner}}
             <a href="/house/edit/{{house._id}}" class="edit">Edit</a>
-            <a href="/house/delete{{house._id}}" class="remove">Delete</a>
+            <a href="/house/delete/{{house._id}}" class="remove">Delete</a>
           {{else if isTenant}}
             <p class="alRentHome">You have already rent this home</p>
           {{else if available}}
-            <a href="/house/rent{{house._id}}" class="rentHome">Rent a home, available
+            <a href="/house/rent/{{house._id}}" class="rentHome">Rent a home, available
               {{available}}
               housing</a>
             <!-- logged in user with available pieces-->

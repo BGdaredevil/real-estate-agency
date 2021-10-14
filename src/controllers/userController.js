@@ -7,6 +7,7 @@ const secret = require("../index.js").secret;
 const tokenExpDate = require("../index.js").tokenExpDate;
 const cookie_name = require("../index.js").cookie_name;
 const userService = require("../services/userService.js");
+const { isAuth } = require("../middlewares/userMiddleware.js");
 
 const register = async (req, res) => {
   const escapedUser = {
@@ -80,6 +81,6 @@ router.get("/register", (req, res) => res.render("user/register"));
 router.post("/register", register);
 router.get("/login", (req, res) => res.render("user/login"));
 router.post("/login", login);
-router.get("/logout", logout);
+router.get("/logout", isAuth, logout);
 
 module.exports = router;

@@ -5,14 +5,8 @@ const saltRounds = require("../index.js").saltRounds;
 
 const UserSchema = new mongoose.Schema({
   fullName: { type: String, required: true, validate: /^[A-Z]{1}[a-z]+ {1}[A-Z]{1}[a-z]+$/ },
-  username: { type: String, required: true, minlength: 5 },
+  username: { type: String, required: true, minlength: 5, unique: true },
   password: { type: String, required: true, minlength: 4 },
-  //   houses: [
-  //     {
-  //       type: mongoose.Schema.Types.ObjectId,
-  //       ref: "House",
-  //     },
-  //   ],
 });
 
 UserSchema.pre("save", async function (next) {

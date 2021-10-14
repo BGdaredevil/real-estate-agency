@@ -17,10 +17,26 @@ const getOne = (id) => {
 };
 
 const updateOne = (id, data) => {
-  console.log("in upd", id);
   return HouseModel.findByIdAndUpdate(id, data, { runValidators: true, new: true });
 };
 
-const houseService = { getLastThree, create, getAll, getOne, updateOne };
+const deleteOne = (id) => {
+  return HouseModel.findByIdAndDelete(id);
+};
+
+const rent = async (houseId, user) => {
+  const house = await HouseModel.findById(houseId);
+  console.log(user.id);
+  house.tenants.push(user.id);
+  return house.save();
+};
+
+const search = async (typeStr) => {
+  console.log(typeStr);
+  const searchObj = { type: new RegExp(typeStr, "i") };
+  return HouseModel.find(searchObj).lean();
+};
+
+const houseService = { getLastThree, create, getAll, getOne, updateOne, deleteOne, rent, search };
 
 module.exports = houseService;

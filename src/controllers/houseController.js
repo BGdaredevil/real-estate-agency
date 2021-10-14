@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const validator = require("validator");
 
+const { isAuth } = require("../middlewares/userMiddleware.js");
 const houseService = require("../services/houseServise.js");
 const { houseEscape } = require("../utils/dataEscape.js");
 
@@ -28,6 +28,21 @@ const create = async (req, res) => {
   }
 
   res.redirect("/");
+};
+
+const details = async (req, res) => {
+  const viewObj = {};
+  const house = await houseService.getOne(req.params.id);
+  viewObj.house = house;
+  viewObj.isOwner = house.owner == req?.user?.id;
+  viewObj.isTenant = house.tenants.some((x) => x._id == req?.user?.id);
+  viewObj.available = house.availablePieces - house.tenants.length;
+  if (house.tenants.length === 0) {
+    house.tenants = false;
+  } else {
+    house.tenants = house.tenants.map((t) => t.fullName).join(", ");
+  }
+  res.render("house/details", viewObj);
 };
 
 const allHouses = async (req, res) => {
@@ -72,35 +87,42 @@ const edit = async (req, res) => {
   }
 };
 
-const details = async (req, res) => {
-  const viewObj = {};
-  const house = await houseService.getOne(req.params.id);
-  viewObj.house = house;
-  viewObj.isOwner = house.owner == req?.user?.id;
-  viewObj.isTenant = house.tenants.includes(req?.user?.id);
-  viewObj.available = house.availablePieces - house.tenants.length;
-  if (house.tenants.length === 0) {
-    house.tenants = false;
-  } else {
-    house.tenants.map((t) => t.fullName).join(", ");
+const rentOut = async (req, res) => {
+  try {
+    await houseService.rent(req.params.id, req.user);
+    res.redirect(`/house/details/${req.params.id}`);
+  } catch (err) {
+    console.log(err);
   }
-  // console.log(viewObj);
-  // // console.log(req.user);
-  res.render("house/details", viewObj);
 };
 
-const remove = (req, res) => {
-  res.render("house/edit");
+const remove = async (req, res) => {
+  try {
+    await houseService.deleteOne(req.params.id);
+    res.redirect("/house");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const search = async (req, res) => {
+  const list = await houseService.search(req.body.nameQuery);
+  const viewObj = {};
+  if (list.length > 0) {
+    viewObj.houses = list;
+  }
+  res.render("house/search", viewObj);
 };
 
 router.get("/", allHouses);
-router.get("/create", (req, res) => res.render("house/create"));
-router.post("/create", create);
+router.get("/create", isAuth, (req, res) => res.render("house/create"));
+router.post("/create", isAuth, create);
 router.get("/search", (req, res) => res.render("house/search"));
-router.get("/edit/:id", loadEdit);
-router.post("/edit/:id", edit);
+router.post("/search", search);
+router.get("/edit/:id", isAuth, loadEdit);
+router.post("/edit/:id", isAuth, edit);
 router.get("/details/:id", details);
-router.get("/rent/:id", details);
-router.get("/delete/:id", remove);
+router.get("/rent/:id", isAuth, rentOut);
+router.get("/delete/:id", isAuth, remove);
 
 module.exports = router;
