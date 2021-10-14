@@ -13,9 +13,14 @@ const getAll = () => {
 };
 
 const getOne = (id) => {
-  return HouseModel.findById(id).lean();
+  return HouseModel.findById(id).populate("tenants").lean();
 };
 
-const houseService = { getLastThree, create, getAll, getOne };
+const updateOne = (id, data) => {
+  console.log("in upd", id);
+  return HouseModel.findByIdAndUpdate(id, data, { runValidators: true, new: true });
+};
+
+const houseService = { getLastThree, create, getAll, getOne, updateOne };
 
 module.exports = houseService;

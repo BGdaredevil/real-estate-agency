@@ -2,17 +2,10 @@ const router = require("express").Router();
 const validator = require("validator");
 
 const houseService = require("../services/houseServise.js");
+const { houseEscape } = require("../utils/dataEscape.js");
 
-const create = (req, res) => {
-  const escapedHome = {
-    name: validator.escape(req.body.name.trim()),
-    type: validator.escape(req.body.type.trim()),
-    yearBuilt: validator.escape(req.body.yearBuilt.trim()),
-    location: validator.escape(req.body.location.trim()),
-    imageUrl: req.body.imageUrl.trim(),
-    description: validator.escape(req.body.description.trim()),
-    availablePieces: validator.escape(req.body.availablePieces.trim()),
-  };
+const create = async (req, res) => {
+  const escapedHome = houseEscape(req.body);
 
   if (Object.values(escapedHome).includes("")) {
     console.log("empty detected");
@@ -21,9 +14,7 @@ const create = (req, res) => {
     return;
   }
 
-  console.log(validator.isURL(escapedHome.imageUrl));
-
-  if (!validator.isURL(escapedHome.imageUrl)) {
+  if (!escapedHome.isValidUrl) {
     escapedHome.error = { message: "Please use a valid URL" };
     res.render("house/create", escapedHome);
     return;
@@ -31,7 +22,7 @@ const create = (req, res) => {
 
   try {
     escapedHome.owner = req.user.id;
-    houseService.create(escapedHome);
+    await houseService.create(escapedHome);
   } catch (err) {
     console.log(err);
   }
@@ -49,17 +40,52 @@ const allHouses = async (req, res) => {
   res.render("house/allList", viewObj);
 };
 
-const loadEdit = (req, res) => {
-  res.render("house/edit");
+const loadEdit = async (req, res) => {
+  const house = await houseService.getOne(req.params.id);
+  console.log(house);
+  res.render("house/edit", house);
+};
+
+const edit = async (req, res) => {
+  console.log(req.params.id);
+  const escapedHouse = houseEscape(req.body);
+
+  if (Object.values(escapedHouse).includes("")) {
+    console.log("empty detected");
+    escapedHouse.error = { message: "All fields are mandatory" };
+    res.render(`house/edit/${req.params.id}`, escapedHouse);
+    return;
+  }
+
+  if (!escapedHouse.isValidUrl) {
+    escapedHouse.error = { message: "Please use a valid URL" };
+    res.render(`house/edit/${req.params.id}`, escapedHouse);
+    return;
+  }
+
+  try {
+    console.log(escapedHouse);
+    await houseService.updateOne(req.params.id, escapedHouse);
+    res.redirect(`/house/details/${req.params.id}`);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const details = async (req, res) => {
   const viewObj = {};
   const house = await houseService.getOne(req.params.id);
   viewObj.house = house;
-  viewObj.isOwner = house.owner == req.user._id;
-  viewObj.isTenant = house.tenants.includes(req.user._ic);
-  console.log(viewObj);
+  viewObj.isOwner = house.owner == req?.user?.id;
+  viewObj.isTenant = house.tenants.includes(req?.user?.id);
+  viewObj.available = house.availablePieces - house.tenants.length;
+  if (house.tenants.length === 0) {
+    house.tenants = false;
+  } else {
+    house.tenants.map((t) => t.fullName).join(", ");
+  }
+  // console.log(viewObj);
+  // // console.log(req.user);
   res.render("house/details", viewObj);
 };
 
@@ -71,8 +97,10 @@ router.get("/", allHouses);
 router.get("/create", (req, res) => res.render("house/create"));
 router.post("/create", create);
 router.get("/search", (req, res) => res.render("house/search"));
-router.get("/details/:id", details);
 router.get("/edit/:id", loadEdit);
+router.post("/edit/:id", edit);
+router.get("/details/:id", details);
+router.get("/rent/:id", details);
 router.get("/delete/:id", remove);
 
 module.exports = router;

@@ -3,31 +3,43 @@
     <div class="box-image"></div>
     <h2 class="box-heading">Edit Home</h2>
 
-    <form class="form" action="/house/edit/{{id}}" method="post">
+    <form class="form" action="/house/edit/{{_id}}" method="post">
       <div class="input">
-        <input type="text" class="input-field" id="home-name" name="name" value="" />
+        <input type="text" class="input-field" id="home-name" name="name" value="{{name}}" />
         <label class="home-name">Name:</label>
       </div>
       <div class="input">
-        <input type="text" class="input-field" id="type" name="type" value="" />
+        <input type="text" class="input-field" id="type" name="type" value="{{type}}" />
         <label class="type">Property Type:</label>
       </div>
       <div class="input">
-        <input type="number" class="input-field" id="year" name="yearBuilt" value="" />
+        <input type="number" class="input-field" id="year" name="yearBuilt" value="{{yearBuilt}}" />
         <label class="year">Year Built:</label>
       </div>
       <div class="input">
-        <input type="text" class="input-field" id="city" name="location" value="" />
+        <input type="text" class="input-field" id="city" name="location" value="{{location}}" />
         <label class="city">City</label>
       </div>
 
       <div class="input">
-        <input type="text" class="input-field" id="homeImage" name="imageUrl" value="" />
+        <input
+          type="text"
+          class="input-field"
+          id="homeImage"
+          name="imageUrl"
+          value="{{imageUrl}}"
+        />
         <label class="homeImage">Home Image:</label>
       </div>
 
       <div class="input">
-        <input type="text" class="input-field" id="description" name="description" value="" />
+        <input
+          type="text"
+          class="input-field"
+          id="description"
+          name="description"
+          value="{{description}}"
+        />
         <label class="description">Property Description:</label>
       </div>
 
@@ -37,7 +49,7 @@
           class="input-field"
           id="availablePieces"
           name="availablePieces"
-          value=""
+          value="{{availablePieces}}"
         />
         <label class="availablePieces">Available pieces:</label>
       </div>
