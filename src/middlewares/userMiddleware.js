@@ -8,12 +8,17 @@ exports.auth = async (req, res, next) => {
   if (!token) {
     return next();
   }
-
-  const user = await util.promisify(jwt.verify)(token, secret);
-  req.user = user;
-  res.locals.user = user;
-
-  next();
+  try {
+    // TODO: .catch res.clearCookie; res.redirect('login') on invalid cookie
+    const user = await util.promisify(jwt.verify)(token, secret);
+    req.user = user;
+    res.locals.user = user;
+    next();
+  } catch (err) {
+    console.log(err);
+    res.clearCookie(cookie_name);
+    res.redirect("/user/login");
+  }
 };
 
 exports.isAuth = (req, res, next) => {
